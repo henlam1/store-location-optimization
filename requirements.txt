@@ -1,0 +1,10 @@
+# Gurobi academic licenses are tied to a major version; 14.x will not accept a 13.x license.
+gurobipy>=13,<14
+numpy
+pandas
+geopandas
+matplotlib
+seaborn
+plotly
+nbformat
+ipykernel

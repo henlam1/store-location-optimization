@@ -20,10 +20,13 @@ Each model is solved for `p = 1, ..., 10` with a 60-second time limit per run. T
 
 ## Setup
 
-1. Install dependencies:
+1. Create a virtual environment and install dependencies:
    ```bash
-   pip install gurobipy numpy pandas geopandas matplotlib seaborn plotly nbformat ipykernel
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
    ```
+   This installs Gurobi 13.x. Don't upgrade to Gurobi 14: version 13 academic licenses don't work with it.
 2. Get a free Gurobi academic license. These models are too large for the restricted license bundled with `pip install gurobipy`.
    - Run `grbgetkey <your-key>` while on the Cornell network or VPN
    - Put `gurobi.lic` in your home folder, or set the `GRB_LICENSE_FILE` environment variable to its path
