@@ -1,0 +1,123 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amssymb}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{accents}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{hyperref} 
+\usepackage[dvipsnames]{xcolor}
+\renewcommand{\thempfootnote}{\arabic{mpfootnote}}
+
+\definecolor{urlBlue}{HTML}{1A0DAB} 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=urlBlue,    % Color of internal links (sections, pages)
+    urlcolor=urlBlue,     % Color of URL links (web addresses)
+    citecolor=urlBlue     % Color of citation links
+}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\sol}{\text{sol}}
+
+\newcommand{\ubar}[1]{\underaccent{\bar}{#1}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert\right_{#2}}
+
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+\noindent ORIE 5380 - Optimization Methods (Fall 2026) \hfill \today
+
+\vspace{1cm}
+\begin{center}
+\Large{ORIE 5380 - Course Project}
+\end{center}
+\vspace{0.5cm}
+
+\textbf{Instructions:} In the course project, you will get experience formulating, testing, and interpreting models to support business decisions. The project has two parts, where in each part you will develop and test two models, submit a PDF report of results on Gradescope, and complete a 10-15 minute in-class quiz to check your understanding. You are not required to use a particular program for your report but all text outside of equations should be typed. We encourage you to use a program like Latex or use an AI model and a tool like \href{https://latex2image.joeraut.com/}{Latex2Img} to produce nicely typeset equations but we will accept photos of cleanly handwritten equations. If you want to use Overleaf/Latex, the project file is available \href{https://canvas.cornell.edu/courses/88614/files/folder/project}{here}.\\
+
+\textbf{The project can be done individually or in pairs.} Either way, you must register your group in  \href{https://docs.google.com/spreadsheets/d/1Qzpdowc_uBHIe97B-gszYy7gAgAWgxaJapTZxUTM9T8/edit?usp=sharing}{the tracking spreadsheet} by 11/11. The spreadsheet has a section for students looking for partners. Like on the homework, you can discuss with students outside of your group at the level of a hallway discussion but the the reports should be independent.\\
+
+\begin{minipage}{\textwidth}
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+    & \multicolumn{1}{c|}{\textbf{Due Date}} & \multicolumn{1}{c|}{\textbf{Weight}} \\ \hline
+Register Group & 11/11 11:59pm in \href{https://docs.google.com/spreadsheets/d/1Qzpdowc_uBHIe97B-gszYy7gAgAWgxaJapTZxUTM9T8/edit?usp=sharing}{the tracking spreadsheet}     & *\footnote{A small portion of each report grade will be for following submission instructions, including registering your group by 11/11.} \\ \hline
+Part 1 Report  & 11/18 11:59pm on Gradescope            & 35\%                                 \\ \hline
+Part 1 Quiz    & 11/19 in-class                         & 15\%                                 \\ \hline
+Part 2 Report & 11/30 11:59pm on Gradescope             & 35\%                                 \\ \hline
+Part 2 Quiz   & 12/01 in-class                          & 15\%                                 \\ \hline
+\end{tabular}
+\end{minipage}
+
+\subsubsection*{Starter Code and Gurobi Academic License}
+We have created a Jupyter notebook for the project that starter code for data loading, plotting, etc. You can download the notebook \href{https://canvas.cornell.edu/courses/88614/files/folder/project?preview=16397642}{here}. The models in the project are large enough you need a Gurobi Academic License. Follow the instructions \href{https://canvas.cornell.edu/courses/88614/discussion_topics/1102292}{in this post} to setup an academic license. Near the top of the starter code, there is a cell testing that your academic license is setup properly. \textbf{Please check your license is setup properly well in advance of the project deadline.}
+
+\subsubsection*{AI Policy}
+
+Excitingly, AI tools have made it easier for people to formulate and implement models as well as visualize, interpret, and share results. While AI speeds up the modeling process, to design optimization models effectively it is important that you i) understand your model formulation, ii) can identify optimization bottlenecks, and iii) can interpret the results with respect to the original problem.\\
+
+You are welcome to do the project with or without the assistance of AI. \textbf{At the start of your report, you must specify if and how you used AI.} Like in the rest of the course, you are responsible for the content of your report regardless of whether AI assisted and you cannot use algorithms or methods not discussed in class. You should be able to explain every word, sentence, or argument of your report if asked by an instructor and to be prepared for the quizzes. Each quiz will have 2-3 questions and focus on testing your understanding of the three components above. 
+
+\newpage
+
+
+\subsection*{Part 1: Selecting Stores to Minimize Travel Time} 
+
+Suppose you work for an online retailer looking to partner with a chain of stores to offer in-store pickup and returns to reduce delivery costs. As locations require space and staff time, you want to test a pilot program offering the service at $p$ of the chain's $N$ locations.  \\
+
+To make our notation cleaner, let $[N] = 1, \ldots, N$. Suppose you have data for the $M$ delivery addresses of customers that have purchased from your store in the last 3 months, $x_i, i \in [M]$, and the $N$ locations of potential stores, $y_j, j \in [N]$.
+
+\begin{enumerate}
+    \item Formulate an optimization model to select $p$ stores to minimize the mean (average) distance that a customer needs to travel to a participating store. Let $t_{ij}$ be the travel time for customer $i$ to travel to store $j$. Include your full model in the report, including a written description of what each variable represents.
+
+    \item Formulate an optimization model to select $p$ stores to minimize the worst-case (maximum) customer travel time. Again, include you full model in the report, defining any variables. 
+
+    \item Using the Jupyter notebook provided, implement both models using \verb|gurobipy|. Test each model on the provided data for $p = 1, \ldots, 10$ with a maximum time limit of one minute per value of $p$. Create i) a plot showing runtime versus $p$ and ii) a plot showing optimality gap versus $p$, using separate colors to plot both models on each plot so you can easily compare their performance. Which model performed better in terms of runtime? If both models took the maximum runtime, you can compare the optimality gaps. Do you think the difference in optimization performance between the two models would be an important consideration in practice?
+    
+    \item Fill in the plotting code in the Jupyter notebook to create a plot showing the average and worst-case travel time for each model and value of $p$ and include the plot in your report. Describe how the average and worst-case customer travel time change as you include more locations in the pilot. 
+    
+    \item Using the included plotting code, spatially visualize the closest store for each customer and minimum travel time for each customer for both models, including the closest store figure for $p = 5$ for both models in your report. Which model do you think results in a better solution? Justify your answer.
+
+    \item One of your colleagues is concerned that you used OSRM traffic-free travel times because they think it is unrealistic to assume that there would be no traffic in Manhattan. They suggest using travel distances instead of travel times. Could travel distances easily be incorporated into the model? Explain why or why not, but you do not need to formulate a new model. Do you think using travel distance instead of travel time is an improvement to the model?
+    
+\end{enumerate}
+
+\newpage
+
+\subsection*{Part 2: Selecting Stores Based on Customer Usage}
+
+In your research on pick-up and return locations, you learn that often only a small segment of customers use in-store services. Your company is interested in modifying the model to select stores for the pilot to best serve customers that are likely to use the service.\\
+
+You learn that two teams in your company have developed machine learning models to predict if a particular customer would be likely to use an in-store service. The first team developed a model that predicts whether a customer would use the service at any location (meaning, use it at all) and the second team created a model that makes a separate prediction for whether each customer would use the service at each store/location. Your supervisor is most interested in the second model due to its more detailed predictions, but is worried that using more predicted values could make the optimization slow. So, they want you to develop optimization models using both predictions and compare them.\\
+
+Let $p_i$ be the prediction from the first model that customer $i$ uses the service at all and $p_{ij}$ be the prediction from the second model that customer $i$ uses the service at store $j$.\\
+
+\begin{enumerate}
+    \item Formulate an optimization model to select $p$ locations to minimize expected travel time using the predictions from the model that makes one prediction per customer, $p_i$. Include your full model in the report, defining any new variables.
+    
+    \item Formulate an optimization model to select $p$ locations to maximize the expected number of customers using the service using the predictions for each customer and store, $p_{ij}$. Include your full model in the report, defining any new variables.
+
+    \item Explain why your formulation in the last question could not be used to select stores for the pilot by substituting the $p_{ij}$ values with the $p_i$ values.
+    
+    \item In the Jupyter notebook, implement both models using \verb|gurobipy|. Test each model on the provided data for $p = 1, \ldots, 10$ with a maximum time limit of one minute per value of $p$. Create plots of runtime versus $p$ and optimality gap versus $p$, using separate colors to plot both models on the same plot so you can easily compare their performance. Which model performed better in terms of runtime? Was your supervisor correct to be concerned about the runtime of the model with the larger number of predictions? 
+    
+    \item Fill in the plotting code in the Jupyter notebook to create i) a plot showing the expected number of customers using the service for each value of $p$ and ii) a plot showing the expected travel distance for each value of $p$. Describe how these values relate to each of the optimization models as well as the goal of running an in-store pilot program.
+    
+    \item Using the plotting code in the Jupyter notebook, visualize the store each customer is assigned to for each model and include the figure for $p = 5$ for each model in your report. Do customers seem to generally prefer the closest store by distance?
+
+    \item A colleague from the team that trained the model that predicts whether a customer will use the service at all ($p_i$) says that their team tried predicting whether each customer would use each store but found that the model produced small noisy predictions. They believe this happened because almost all of the labels are zero, i.e. in more cases a customer would not use the service at a specific score. To see this, consider that even if every customer used the service but at just one store, $35/36 = 97\%$ of labels would be zero. Could this be an issue for the predictions from the other team's model? How would that impact the optimization?
+    
+    \item Which of the four models would you recommend using to select stores for the pilot? How many stores do you think should be selected? Justify your answer. 
+
+\end{enumerate}
+
+
+\end{document}
